@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,9 +22,9 @@ class BlogController extends AbstractController
         $this->session = $session;
     }
     /**
-     * @Route("/{name}", name="index")
+     * @Route("/", name="index")
      */
-    public function index($name)
+    public function index()
     {
        return $this->render('blog/index.html.twig', [
            'posts' => $this->session->get('posts')
@@ -36,10 +38,13 @@ class BlogController extends AbstractController
     {
         $posts = $this->session->get('posts');
         $posts[uniqid()] = [
-            'title' => 'A Random Title '. rand(1, 500),
-            'text' => 'Some random text number : '. rand(1, 500)
+            'title' => 'Some Random Title '. rand(1, 500),
+            'text' => 'Some random text number : '. rand(1, 500),
+            'date' => new DateTime()
         ];
         $this->session->set('posts', $posts);
+
+        return new RedirectResponse($this->generateUrl('blog_index'));
     }
 
     /**
@@ -54,7 +59,7 @@ class BlogController extends AbstractController
             throw new NotFoundHttpException('Post not found');
         }
         
-        $this->render('blog/post.html.twig', [
+        return $this->render('blog/post.html.twig', [
             'id' => $id,
             'post' => $posts[$id]
         ]);
